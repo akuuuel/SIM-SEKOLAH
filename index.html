@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="id">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="manifest" href="/manifest.webmanifest" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#172BFF" />
+    <meta name="description" content="System Absensi Sekolah MAN 1 BULUKUMBA Berbasis Web PWA Offline-First" />
+    <title>System Absensi Sekolah — MAN 1 BULUKUMBA</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Library Scanner Barcode HTML5 & ZXing untuk Deteksi Otomatis Real-time di HP & PC -->
+    <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
+    <script src="https://unpkg.com/@zxing/library@0.21.3/umd/index.min.js"></script>
+    <style>
+      #html5qr-reader {
+        border: none !important;
+        width: 100% !important;
+      }
+      #html5qr-reader video {
+        border-radius: 12px !important;
+        object-fit: cover !important;
+        max-height: 380px !important;
+      }
+      #html5qr-reader__scan_region {
+        display: flex !important;
+        justify-content: center !important;
+        align-items: center !important;
+        border: none !important;
+      }
+      #html5qr-reader__scan_region img {
+        display: none !important;
+      }
+      #html5qr-reader__header_message {
+        display: none !important;
+      }
+    </style>
+  </head>
+  <body class="bg-canvas text-content-primary font-sans antialiased selection:bg-primary-100 selection:text-primary-700">
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+    <script>
+      if ('serviceWorker' in navigator && window.location.protocol.startsWith('http')) {
+        window.addEventListener('load', () => {
+          navigator.serviceWorker.register('/sw.js').catch(function() {});
+        });
+      }
+    </script>
+  </body>
+</html>
+

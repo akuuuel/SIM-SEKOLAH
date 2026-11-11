@@ -1,0 +1,19 @@
+{
+  "name": "System Absensi Sekolah MAN 1 BULUKUMBA",
+  "short_name": "Absensi MAN 1",
+  "description": "Aplikasi System Absensi Sekolah MAN 1 BULUKUMBA PWA Offline-First",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#090A0F",
+  "theme_color": "#172BFF",
+  "orientation": "any",
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
+
