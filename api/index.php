@@ -244,7 +244,7 @@ switch ($action) {
                         updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
                         INDEX idx_student_id (student_id),
                         INDEX idx_phone (phone)
-                    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
+                    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
                 ");
 
                 // Bersihkan langganan tanpa endpoint valid
@@ -265,7 +265,7 @@ switch ($action) {
                             updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
                             INDEX idx_no_hp (no_hp),
                             INDEX idx_id_siswa (id_siswa)
-                        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
+                        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
                     ");
                     $checkCol = $pdo->query("SHOW COLUMNS FROM orang_tua LIKE 'student_ids'")->fetch();
                     if (!$checkCol) {
@@ -375,7 +375,7 @@ switch ($action) {
                             $cleanD = preg_replace('/[^0-9]/', '', $vp);
                             if (strlen($cleanD) >= 8) {
                                 $last8 = substr($cleanD, -8);
-                                $subConditions[] = "(phone LIKE ? AND ? != '')";
+                                $subConditions[] = "(phone LIKE ? AND CHAR_LENGTH(?) > 0)";
                                 $subParams[] = "%{$last8}%";
                                 $subParams[] = $last8;
                                 break;
@@ -847,7 +847,7 @@ switch ($action) {
                     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
                     INDEX idx_no_hp (no_hp),
                     INDEX idx_id_siswa (id_siswa)
-                ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
+                ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
             ");
 
             // Otomatis migrasikan akun orang tua dari tabel users ke orang_tua jika ada
@@ -988,7 +988,7 @@ switch ($action) {
                     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
                     INDEX idx_no_hp (no_hp),
                     INDEX idx_id_siswa (id_siswa)
-                ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
+                ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
             ");
 
             // Pastikan kolom student_ids dan panjang id_siswa sudah diperbarui
@@ -1155,7 +1155,7 @@ switch ($action) {
 
                     $inOld = implode(',', array_fill(0, count($oldPhoneVariants), '?'));
                     $updOldParams = array_merge([$noHp, $namaWali], $oldPhoneVariants, [$likeOld, $likeOld]);
-                    $pdo->prepare("UPDATE siswa SET no_wa = ?, nama_wali = ? WHERE no_wa IN ($inOld) OR (no_wa LIKE ? AND ? != '')")
+                    $pdo->prepare("UPDATE siswa SET no_wa = ?, nama_wali = ? WHERE no_wa IN ($inOld) OR (no_wa LIKE ? AND CHAR_LENGTH(?) > 0)")
                         ->execute($updOldParams);
                 } catch (Throwable $e) {
                 }
@@ -1178,7 +1178,7 @@ switch ($action) {
             try {
                 $phone8 = strlen($cleanNewDigits) >= 8 ? substr($cleanNewDigits, -8) : $cleanNewDigits;
                 $likeClean = $phone8 ? "%{$phone8}%" : "";
-                $pdo->prepare("DELETE FROM deleted_accounts WHERE id = ? OR identifier = ? OR phone = ? OR (phone LIKE ? AND ? != '')")->execute([$id, $noHp, $cleanNewDigits, $likeClean, $likeClean]);
+                $pdo->prepare("DELETE FROM deleted_accounts WHERE id = ? OR identifier = ? OR phone = ? OR (phone LIKE ? AND CHAR_LENGTH(?) > 0)")->execute([$id, $noHp, $cleanNewDigits, $likeClean, $likeClean]);
             } catch (Throwable $e) {
             }
 
@@ -1215,7 +1215,7 @@ switch ($action) {
                     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
                     INDEX idx_no_hp (no_hp),
                     INDEX idx_id_siswa (id_siswa)
-                ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
+                ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
             ");
 
             // Format variasi nomor telepon untuk pencocokan yang 100% akurat
@@ -1248,7 +1248,7 @@ switch ($action) {
                    OR no_hp = ? 
                    OR no_hp = ? 
                    OR no_hp = ? 
-                   OR (no_hp LIKE ? AND ? != '')
+                   OR (no_hp LIKE ? AND CHAR_LENGTH(?) > 0)
             ");
             $likeClean = $phone8 ? "%{$phone8}%" : "";
             $stmt->execute([$id, $noHp, $phone08, $phone62, $cleanDigits, $likeClean, $likeClean]);
@@ -1296,7 +1296,7 @@ switch ($action) {
                         deleted_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                         INDEX idx_ident (identifier),
                         INDEX idx_phone (phone)
-                    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
+                    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
                 ");
                 $insDel = $pdo->prepare("
                     INSERT INTO deleted_accounts (id, identifier, phone, role) 
@@ -1346,7 +1346,7 @@ switch ($action) {
                         updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
                         INDEX idx_no_hp (no_hp),
                         INDEX idx_id_siswa (id_siswa)
-                    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
+                    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
                 ");
             } catch (Exception $e) {
             }
@@ -1365,7 +1365,7 @@ switch ($action) {
                         SELECT id, status FROM orang_tua 
                         WHERE no_hp = ? 
                            OR no_hp = ? 
-                           OR (no_hp LIKE ? AND ? != '')
+                           OR (no_hp LIKE ? AND CHAR_LENGTH(?) > 0)
                         LIMIT 1
                     ");
                     $chkOt->execute([$phone, $cleanPhoneDigits, $likeCleanDigits, $likeCleanDigits]);
@@ -1375,7 +1375,7 @@ switch ($action) {
                             $isActiveInOrangTua = true;
                             // Hapus residu deleted_accounts lama jika ada
                             try {
-                                $pdo->prepare("DELETE FROM deleted_accounts WHERE id = ? OR identifier = ? OR phone = ? OR (phone LIKE ? AND ? != '')")
+                                $pdo->prepare("DELETE FROM deleted_accounts WHERE id = ? OR identifier = ? OR phone = ? OR (phone LIKE ? AND CHAR_LENGTH(?) > 0)")
                                     ->execute([$otRow['id'], $phone, $cleanPhoneDigits, $likeCleanDigits, $likeCleanDigits]);
                             } catch (Exception $e) {
                             }
@@ -1386,7 +1386,7 @@ switch ($action) {
 
                 if (!$isActiveInOrangTua) {
                     try {
-                        $chkDel = $pdo->prepare("SELECT id FROM deleted_accounts WHERE identifier = ? OR phone = ? OR (phone LIKE ? AND ? != '') LIMIT 1");
+                        $chkDel = $pdo->prepare("SELECT id FROM deleted_accounts WHERE identifier = ? OR phone = ? OR (phone LIKE ? AND CHAR_LENGTH(?) > 0) LIMIT 1");
                         $chkDel->execute([$phone, $cleanPhoneDigits, $likeCleanDigits, $likeCleanDigits]);
                         if ($chkDel->fetch()) {
                             echo json_encode([
@@ -1570,7 +1570,7 @@ switch ($action) {
                         kunci VARCHAR(50) PRIMARY KEY,
                         nilai TEXT,
                         updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
-                    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
+                    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
                 ");
                 $setStmt = $pdo->query("SELECT kunci, nilai FROM pengaturan");
                 while ($setRow = $setStmt->fetch(PDO::FETCH_ASSOC)) {
@@ -1606,7 +1606,7 @@ switch ($action) {
                     kunci VARCHAR(50) PRIMARY KEY,
                     nilai TEXT,
                     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
-                ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
+                ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
             ");
             $settings = isset($payload['settings']) && is_array($payload['settings']) ? $payload['settings'] : $payload;
             $setStmt = $pdo->prepare("
@@ -1632,7 +1632,7 @@ switch ($action) {
                     kunci VARCHAR(50) PRIMARY KEY,
                     nilai TEXT,
                     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
-                ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
+                ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
             ");
             $defaults = [
                 'entry_limit' => '07:15',
@@ -1690,7 +1690,7 @@ switch ($action) {
                         phone VARCHAR(50) DEFAULT NULL,
                         status VARCHAR(20) DEFAULT 'ACTIVE',
                         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-                    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
+                    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
                 ");
                 $targetTable = 'users';
             }
@@ -1816,7 +1816,7 @@ switch ($action) {
                     phone VARCHAR(50) DEFAULT NULL,
                     status VARCHAR(20) DEFAULT 'ACTIVE',
                     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-                ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
+                ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
             ");
 
             // Cek kolom aktual pada tabel
@@ -1936,7 +1936,7 @@ switch ($action) {
                         deleted_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                         INDEX idx_ident (identifier),
                         INDEX idx_phone (phone)
-                    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
+                    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
                 ");
                 $insDel = $pdo->prepare("
                     INSERT INTO deleted_accounts (id, identifier, phone, role) 
@@ -1979,7 +1979,7 @@ switch ($action) {
                     deleted_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                     INDEX idx_ident (identifier),
                     INDEX idx_phone (phone)
-                ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
+                ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
             ");
 
             $cleanDigits = preg_replace('/[^0-9]/', '', $phone ?: ($username ?: $userId));
@@ -1995,7 +1995,7 @@ switch ($action) {
                         WHERE id = ? 
                            OR no_hp = ? 
                            OR no_hp = ? 
-                           OR (no_hp LIKE ? AND ? != '')
+                           OR (no_hp LIKE ? AND CHAR_LENGTH(?) > 0)
                         LIMIT 1
                     ");
                     $otStmt->execute([$userId, $phone ?: $username, $cleanDigits, $likeClean, $likeClean]);
@@ -2012,7 +2012,7 @@ switch ($action) {
                         }
                         // Bersihkan riwayat deleted_accounts lama jika akun dibuat kembali
                         try {
-                            $pdo->prepare("DELETE FROM deleted_accounts WHERE id = ? OR identifier = ? OR phone = ? OR (phone LIKE ? AND ? != '')")
+                            $pdo->prepare("DELETE FROM deleted_accounts WHERE id = ? OR identifier = ? OR phone = ? OR (phone LIKE ? AND CHAR_LENGTH(?) > 0)")
                                 ->execute([$ot['id'], $phone ?: $username, $cleanDigits, $likeClean, $likeClean]);
                         } catch (Exception $e) {
                         }
@@ -2030,10 +2030,10 @@ switch ($action) {
                 // Jika tidak ada di tabel orang_tua, baru cek apakah memang pernah sengaja dihapus
                 $chkDel = $pdo->prepare("
                     SELECT id FROM deleted_accounts 
-                    WHERE (id = ? AND ? != '') 
-                       OR (identifier = ? AND ? != '') 
-                       OR (phone = ? AND ? != '') 
-                       OR (phone = ? AND ? != '')
+                    WHERE (id = ? AND CHAR_LENGTH(?) > 0) 
+                       OR (identifier = ? AND CHAR_LENGTH(?) > 0) 
+                       OR (phone = ? AND CHAR_LENGTH(?) > 0) 
+                       OR (phone = ? AND CHAR_LENGTH(?) > 0)
                     LIMIT 1
                 ");
                 $chkDel->execute([$userId, $userId, $username ?: $phone, $username ?: $phone, $phone, $phone, $cleanDigits, $cleanDigits]);
@@ -2055,8 +2055,8 @@ switch ($action) {
                 // Cek deleted_accounts
                 $chkDel = $pdo->prepare("
                     SELECT id FROM deleted_accounts 
-                    WHERE (id = ? AND ? != '') 
-                       OR (identifier = ? AND ? != '') 
+                    WHERE (id = ? AND CHAR_LENGTH(?) > 0) 
+                       OR (identifier = ? AND CHAR_LENGTH(?) > 0) 
                     LIMIT 1
                 ");
                 $chkDel->execute([$userId, $userId, $username, $username]);
@@ -2130,14 +2130,14 @@ switch ($action) {
                     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
                     INDEX idx_student_id (student_id),
                     INDEX idx_phone (phone)
-                ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
+                ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
             ");
             // Bersihkan data sampah tanpa endpoint atau tanpa pemilik
             $pdo->exec("DELETE FROM push_subscriptions WHERE endpoint IS NULL OR endpoint = ''");
             $pdo->exec("DELETE FROM push_subscriptions WHERE (student_id IS NULL OR student_id = '') AND (phone IS NULL OR phone = '') AND (user_id IS NULL OR user_id = '')");
 
             // Otomatis bersihkan stale token berlebih (sisakan max 2 subscription terbaru per user/phone)
-            $allUsers = $pdo->query("SELECT DISTINCT user_id FROM push_subscriptions WHERE user_id IS NOT NULL AND user_id != ''")->fetchAll(PDO::FETCH_COLUMN);
+            $allUsers = $pdo->query("SELECT DISTINCT user_id FROM push_subscriptions WHERE user_id IS NOT NULL AND CHAR_LENGTH(user_id) > 0")->fetchAll(PDO::FETCH_COLUMN);
             foreach ($allUsers as $uId) {
                 $q = $pdo->prepare("SELECT id FROM push_subscriptions WHERE user_id = ? ORDER BY id DESC");
                 $q->execute([$uId]);
@@ -2176,7 +2176,7 @@ switch ($action) {
                     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
                     INDEX idx_student_id (student_id),
                     INDEX idx_phone (phone)
-                ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
+                ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
             ");
 
             $userId = isset($payload['userId']) ? trim($payload['userId']) : '';
@@ -2288,7 +2288,7 @@ switch ($action) {
             $pdo->exec("DELETE FROM push_subscriptions WHERE (student_id IS NULL OR student_id = '') AND (phone IS NULL OR phone = '') AND (user_id IS NULL OR user_id = '')");
 
             // Hanya sisakan 2 token pendaftaran paling baru untuk setiap user / nomor HP
-            $allUsers = $pdo->query("SELECT DISTINCT user_id FROM push_subscriptions WHERE user_id IS NOT NULL AND user_id != ''")->fetchAll(PDO::FETCH_COLUMN);
+            $allUsers = $pdo->query("SELECT DISTINCT user_id FROM push_subscriptions WHERE user_id IS NOT NULL AND CHAR_LENGTH(user_id) > 0")->fetchAll(PDO::FETCH_COLUMN);
             foreach ($allUsers as $uId) {
                 $q = $pdo->prepare("SELECT id FROM push_subscriptions WHERE user_id = ? ORDER BY id DESC");
                 $q->execute([$uId]);
@@ -2332,7 +2332,7 @@ switch ($action) {
                     WHERE student_id = ? 
                        OR phone = ? 
                        OR phone = ? 
-                       OR (phone LIKE ? AND ? != '') 
+                       OR (phone LIKE ? AND CHAR_LENGTH(?) > 0) 
                     ORDER BY id DESC LIMIT 1
                 ");
                 $stmt->execute([$studentId, $phone, $cleanP, $like8, $like8]);
