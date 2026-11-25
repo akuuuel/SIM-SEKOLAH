@@ -1,0 +1,84 @@
+# 📋 PANDUAN OPERASIONAL PRESENSI (README.absensi)
+### Sistem Presensi Siswa MAN 1 Bulukumba
+
+Dokumen ini memuat standar operasional prosedur (SOP), aturan pencatatan, penanganan kondisi offline, serta skenario khusus dalam pelaksanaan absensi harian siswa di madrasah.
+
+---
+
+## ⏰ 1. Standar Jam Operasional Presensi
+
+| Sesi Presensi | Rentang Waktu (WITA) | Status Kehadiran Otomatis |
+| :--- | :--- | :--- |
+| **Scan Masuk (Tepat Waktu)** | 06.00 – 07.15 | `HADIR` |
+| **Scan Masuk (Terlambat)** | 07.16 – 12.00 | `TERLAMBAT` (dicatat menit keterlambatannya) |
+| **Scan Kepulangan** | Sesuai jam pulang madrasah | `PULANG` (merekam jam kepulangan siswa) |
+| **Tidak Hadir / Izin** | Ditetapkan oleh Guru Piket / Operator | `IZIN`, `SAKIT`, `BK`, atau `ALFA` |
+
+---
+
+## 🎯 2. Penanganan Skenario Lapangan & Kondisi Khusus
+
+### Skenario A: Siswa Scan Masuk dan Scan Pulang Normal
+- **Pagi:** Siswa scan kartu di gerbang ➔ Tercatat status `HADIR` atau `TERLAMBAT` beserta jam masuk.
+- **Sore:** Siswa scan kartu saat pulang ➔ Transaksi kepulangan tercatat (`PULANG`) dengan jam pulang yang akurat.
+- **Hasil di Dasbor:** Waktu Masuk dan Waktu Pulang terisi lengkap, status final adalah `HADIR` atau `TERLAMBAT`.
+
+### Skenario B: Siswa Tidak Scan Masuk, Namun Scan Pulang di Sore Hari
+- **Kasus:** Siswa terlupa scan pagi atau masuk lewat gerbang lain tanpa scan, namun saat sore siswa melakukan scan kepulangan.
+- **Penanganan Sistem:**
+  1. Sistem tetap menerima dan mencatat transaksi kepulangan siswa (`PULANG`) dengan jam scan yang akurat.
+  2. Data kepulangan tetap tampil di dasbor orang tua dan laporan madrasah.
+  3. Status kehadiran masuknya tetap ditandai memerlukan verifikasi (atau default `ALFA`) hingga operator/guru piket mengonfirmasi kehadirannya.
+  4. Jam pulang tidak hilang dan tetap tersimpan sebagai bukti siswa memang berada di madrasah saat jam pulang.
+
+### Skenario C: Perangkat Scan Pagi Sedang Offline, Perangkat Scan Sore Online
+- **Kasus:** Pagi hari HP/laptop gerbang mati lampu / offline internet. Sore harinya siswa scan di perangkat lain yang terhubung ke internet.
+- **Penanganan Sistem:**
+  1. Data scan masuk tetap tersimpan 100% aman di database lokal (**IndexedDB**) HP/laptop pagi.
+  2. Data scan sore langsung masuk ke server pusat via perangkat online.
+  3. Begitu perangkat pagi kembali tersambung ke WiFi/internet, klik tombol **"Sinkronisasi"** di menu aplikasi.
+  4. Sistem akan otomatis menggabungkan transaksi masuk dari perangkat pagi dan transaksi pulang dari perangkat sore menjadi satu rekap harian yang utuh tanpa data ganda.
+
+---
+
+## 📱 3. Panduan untuk Operator / Guru Piket Gerbang
+
+1. **Persiapan:**
+   - Buka aplikasi web absensi di browser Chrome atau Edge (disarankan mode PWA terinstal).
+   - Login menggunakan akun operator gerbang (misal: `admin_pc01`).
+   - Masuk ke menu **Scanner Presensi**.
+2. **Pelaksanaan Scan:**
+   - Arahkan barcode kartu siswa ke pemindai atau kamera.
+   - Perhatikan bunyi konfirmasi (chime audio) dan nama siswa yang muncul di layar.
+   - Tidak perlu menekan tombol apapun; scanner akan memproses setiap siswa secara otomatis dalam waktu < 1 detik.
+3. **Pencatatan Surat Izin / Sakit:**
+   - Jika ada siswa yang membawa surat dokter atau surat izin orang tua, buka menu **Siswa** atau **Presensi Harian**.
+   - Pilih tombol **Izin / Keterangan Manual**, pilih siswa yang bersangkutan, tentukan status (`IZIN` atau `SAKIT`), dan ketikkan keterangan surat.
+
+---
+
+## 👨‍👩‍👧‍👦 4. Panduan untuk Wali Murid / Orang Tua Siswa
+
+1. **Cara Masuk ke Portal Orang Tua:**
+   - Buka tautan presensi madrasah di browser HP.
+   - Pilih tab **"Masuk sebagai Orang Tua"**.
+   - Masukkan **Nomor HP** yang terdaftar di madrasah (sebagai Username dan Password awal).
+2. **Melihat Jam Masuk & Jam Pulang:**
+   - Di halaman Beranda, kalender interaktif menampilkan riwayat kehadiran anak.
+   - Di bawah kalender pada bagian **Catatan Presensi**, transaksi terbaru (seperti **Scan Kepulangan**) akan otomatis berada di urutan **paling atas**, diikuti scan kedatangan pagi hari.
+   - Klik salah satu catatan kartu untuk melihat rincian jam, operator yang memindai, dan ID gerbang.
+3. **Fitur Ganti Akun Saat Offline:**
+   - Jika orang tua memiliki lebih dari satu anak dan perangkat sedang tidak memiliki internet, orang tua tetap dapat keluar dan login kembali ke akun anak lainnya karena data akun tersimpan secara lokal dan aman di HP.
+
+---
+
+## 🔄 5. Standar Operasional Sinkronisasi Data
+
+- Lakukan sinkronisasi secara berkala terutama setelah perangkat selesai digunakan dalam mode offline.
+- Indikator koneksi di pojok atas akan menampilkan status:
+  -  **Online:** Data tersinkronisasi otomatis dengan server.
+  -  **Offline:** Data tersimpan aman di memori lokal HP/laptop.
+  -  **Sinkronisasi Berjalan:** Proses unggah data transaksi lokal ke database pusat madrasah.
+
+---
+*Diterbitkan oleh Tim Pengembang SIM-SEKOLAH MAN 1 Bulukumba.*
