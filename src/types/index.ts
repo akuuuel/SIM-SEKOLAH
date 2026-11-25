@@ -18,6 +18,9 @@ export interface UserAccount {
   lastLoginAt?: string;
   createdAt: string;
   failedLoginCount?: number;  // Tracking percobaan gagal per akun
+  studentId?: string;         // ID/ID Siswa anak yang terhubung (khusus role PARENT)
+  studentIds?: string[];      // Daftar ID seluruh anak jika orang tua memiliki > 1 anak
+  phone?: string;             // Nomor WhatsApp orang tua untuk notifikasi
 }
 
 export interface DeviceConfig {
@@ -33,7 +36,8 @@ export interface Student {
   id: string; // contoh: "M1B-26-005"
   name: string;
   className: string;
-  whatsappNumber?: string;
+  whatsappNumber?: string;    // Nomor WhatsApp Orang Tua / Wali untuk Notifikasi
+  parentName?: string;        // Nama Lengkap Orang Tua / Wali Siswa
   barcodeValue: string;
   isActive: boolean;
   updatedAt?: string;

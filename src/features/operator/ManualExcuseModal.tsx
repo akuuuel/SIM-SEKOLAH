@@ -32,6 +32,8 @@ export const ManualExcuseModal: React.FC<ManualExcuseModalProps> = ({
   );
   const [error, setError] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [existingAttendance, setExistingAttendance] = useState<AttendanceTransaction | null>(null);
+  const [confirmOverride, setConfirmOverride] = useState(false);
 
   const allStudents = useLiveQuery(() => db.students.filter((s) => s.isActive).toArray(), []) || [];
 
@@ -44,15 +46,41 @@ export const ManualExcuseModal: React.FC<ManualExcuseModalProps> = ({
       .slice(0, 8); // Tampilkan 8 saran teratas agar ringkas dan cepat
   }, [allStudents, searchQuery]);
 
+  // Cek apakah siswa yang dipilih sudah memiliki transaksi pada tanggal yang dipilih
+  const checkExistingAttendance = async (studentId: string, date: string) => {
+    try {
+      const tx = await db.transactions
+        .where('studentId')
+        .equals(studentId)
+        .and((t) => t.attendanceDate === date && t.attendanceType === 'MASUK')
+        .first();
+      setExistingAttendance(tx || null);
+      setConfirmOverride(false);
+    } catch {
+      setExistingAttendance(null);
+    }
+  };
+
   const handleSelectStudent = (student: Student) => {
     setSelectedStudent(student);
     setSearchQuery('');
     setError('');
+    checkExistingAttendance(student.id, attendanceDate);
   };
 
   const handleClearSelectedStudent = () => {
     setSelectedStudent(null);
     setSearchQuery('');
+    setExistingAttendance(null);
+    setConfirmOverride(false);
+    setError('');
+  };
+
+  const handleDateChange = (newDate: string) => {
+    setAttendanceDate(newDate);
+    if (selectedStudent) {
+      checkExistingAttendance(selectedStudent.id, newDate);
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -64,44 +92,78 @@ export const ManualExcuseModal: React.FC<ManualExcuseModalProps> = ({
       return;
     }
 
-    setIsSubmitting(true);
-
-    try {
-      // Periksa apakah siswa sudah memiliki catatan izin/sakit/BK pada tanggal ini
-      const existing = await db.transactions
-        .where('studentId')
-        .equals(selectedStudent.id)
-        .and((t) => t.attendanceDate === attendanceDate && t.attendanceType === 'MASUK')
-        .first();
-
-      if (existing && (existing.attendanceStatus === 'IZIN' || existing.attendanceStatus === 'SAKIT' || existing.attendanceStatus === 'BK')) {
-        setError(`Siswa [${selectedStudent.name}] sudah tercatat [${existing.attendanceStatus}] pada tanggal ini.`);
-        setIsSubmitting(false);
+    // Jika siswa sudah memiliki catatan kehadiran pada tanggal ini
+    if (existingAttendance) {
+      // Jika siswa sudah HADIR atau TERLAMBAT tapi konfirmasi override belum dicentang
+      if (['HADIR', 'TERLAMBAT'].includes(existingAttendance.attendanceStatus) && !confirmOverride) {
+        setError(`Siswa [${selectedStudent.name}] SUDAH absen MASUK (${existingAttendance.attendanceStatus}) hari ini. Centang konfirmasi persetujuan di bawah jika ingin mengubah status menjadi ${status}.`);
         return;
       }
 
+      // Jika siswa sudah berstatus sama
+      if (existingAttendance.attendanceStatus === status) {
+        setError(`Siswa [${selectedStudent.name}] sudah berstatus [${status}] pada tanggal ini.`);
+        return;
+      }
+    }
+
+    setIsSubmitting(true);
+
+    try {
       const now = new Date();
-      const transaction: AttendanceTransaction = {
-        transactionId: generateUUID(),
-        studentId: selectedStudent.id,
-        studentName: selectedStudent.name,
-        className: selectedStudent.className,
-        attendanceDate,
-        attendanceType: 'MASUK', // Dicatat pada sesi masuk
-        method: 'MANUAL',
-        attendanceStatus: status,
-        deviceId: currentDeviceId,
-        operatorId: currentUser?.username || 'admin',
-        operatorName: currentUser?.fullName || 'Petugas Piket',
-        deviceTimestamp: now.toISOString(),
-        syncStatus: 'PENDING',
-        note: note.trim() || undefined,
-      };
+      const timeStr = now.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
 
-      await db.transactions.add(transaction);
+      if (existingAttendance) {
+        // UPDATE transaksi yang sudah ada — JANGAN buat transaksi duplikat!
+        const updatedNote = note.trim()
+          ? `${note.trim()} (Diubah dari ${existingAttendance.attendanceStatus} pd ${timeStr})`
+          : `Diubah dari ${existingAttendance.attendanceStatus} menjadi ${status} pada ${timeStr} oleh ${currentUser?.fullName || 'Petugas'}`;
 
-      if (onSuccess) {
-        onSuccess(`Pencatatan [${status}] untuk [${selectedStudent.name}] berhasil disimpan.`);
+        await db.transactions.update(existingAttendance.transactionId, {
+          attendanceStatus: status,
+          note: updatedNote,
+          operatorId: currentUser?.username || 'admin',
+          operatorName: currentUser?.fullName || 'Petugas Piket',
+          syncStatus: 'PENDING',
+        });
+
+        // Hapus sisa transaksi duplikat jika pernah ada sebelumnya untuk siswa ini di tanggal ini
+        const duplicates = await db.transactions
+          .where('studentId')
+          .equals(selectedStudent.id)
+          .and((t) => t.attendanceDate === attendanceDate && t.attendanceType === 'MASUK' && t.transactionId !== existingAttendance.transactionId)
+          .toArray();
+        for (const dup of duplicates) {
+          await db.transactions.delete(dup.transactionId);
+        }
+
+        if (onSuccess) {
+          onSuccess(`Status kehadiran [${selectedStudent.name}] berhasil diubah menjadi [${status}].`);
+        }
+      } else {
+        // Buat transaksi baru karena belum pernah ada catatan di tanggal ini
+        const transaction: AttendanceTransaction = {
+          transactionId: generateUUID(),
+          studentId: selectedStudent.id,
+          studentName: selectedStudent.name,
+          className: selectedStudent.className,
+          attendanceDate,
+          attendanceType: 'MASUK',
+          method: 'MANUAL',
+          attendanceStatus: status,
+          deviceId: currentDeviceId,
+          operatorId: currentUser?.username || 'admin',
+          operatorName: currentUser?.fullName || 'Petugas Piket',
+          deviceTimestamp: now.toISOString(),
+          syncStatus: 'PENDING',
+          note: note.trim() || undefined,
+        };
+
+        await db.transactions.add(transaction);
+
+        if (onSuccess) {
+          onSuccess(`Pencatatan [${status}] untuk [${selectedStudent.name}] berhasil disimpan.`);
+        }
       }
 
       // Reset form
@@ -142,28 +204,63 @@ export const ManualExcuseModal: React.FC<ManualExcuseModalProps> = ({
 
           {selectedStudent ? (
             // Tampilan Siswa yang Sudah Dipilih
-            <div className="flex items-center justify-between p-3 rounded-card bg-primary-50 border border-primary-200">
-              <div className="flex items-center gap-2.5">
-                <div className="w-8 h-8 rounded-full bg-primary-600 text-white flex items-center justify-center font-bold text-xs shrink-0">
-                  <UserCheck className="w-4 h-4" />
+            <div className="space-y-2">
+              <div className="flex items-center justify-between p-3 rounded-card bg-primary-50 border border-primary-200">
+                <div className="flex items-center gap-2.5">
+                  <div className="w-8 h-8 rounded-full bg-primary-600 text-white flex items-center justify-center font-bold text-xs shrink-0">
+                    <UserCheck className="w-4 h-4" />
+                  </div>
+                  <div>
+                    <p className="text-xs font-bold text-primary-900 leading-tight">
+                      {selectedStudent.name}
+                    </p>
+                    <p className="text-[11px] text-primary-700">
+                      Kelas: <strong>{selectedStudent.className}</strong> • ID: <span className="font-mono">{selectedStudent.id}</span>
+                    </p>
+                  </div>
                 </div>
-                <div>
-                  <p className="text-xs font-bold text-primary-900 leading-tight">
-                    {selectedStudent.name}
-                  </p>
-                  <p className="text-[11px] text-primary-700">
-                    Kelas: <strong>{selectedStudent.className}</strong> • ID: <span className="font-mono">{selectedStudent.id}</span>
-                  </p>
-                </div>
+                <button
+                  type="button"
+                  onClick={handleClearSelectedStudent}
+                  className="p-1 rounded-lg text-primary-700 hover:text-primary-900 hover:bg-primary-100 transition-colors"
+                  title="Ganti Siswa"
+                >
+                  <X className="w-4 h-4" />
+                </button>
               </div>
-              <button
-                type="button"
-                onClick={handleClearSelectedStudent}
-                className="p-1 rounded-lg text-primary-700 hover:text-primary-900 hover:bg-primary-100 transition-colors"
-                title="Ganti Siswa"
-              >
-                <X className="w-4 h-4" />
-              </button>
+
+              {/* Status Kehadiran yang Sudah Ada Hari Ini */}
+              {existingAttendance && (
+                <div className={`p-3 rounded-xl border text-xs space-y-2 ${
+                  ['HADIR', 'TERLAMBAT'].includes(existingAttendance.attendanceStatus)
+                    ? 'bg-amber-50 border-amber-300 text-amber-900'
+                    : 'bg-blue-50 border-blue-200 text-blue-900'
+                }`}>
+                  <div className="flex items-start gap-2">
+                    <AlertCircle className="w-4 h-4 shrink-0 mt-0.5 text-amber-600" />
+                    <div>
+                      <p className="font-bold">
+                        Siswa ini sudah tercatat [{existingAttendance.attendanceStatus}] pada tanggal ini.
+                      </p>
+                      <p className="text-[11px] text-slate-600 mt-0.5">
+                        Waktu masuk: {new Date(existingAttendance.deviceTimestamp).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' })} • Metode: {existingAttendance.method}
+                      </p>
+                    </div>
+                  </div>
+
+                  {['HADIR', 'TERLAMBAT'].includes(existingAttendance.attendanceStatus) && (
+                    <label className="flex items-center gap-2 pt-1.5 border-t border-amber-200/80 cursor-pointer text-[11px] font-semibold text-amber-950 select-none">
+                      <input
+                        type="checkbox"
+                        checked={confirmOverride}
+                        onChange={(e) => setConfirmOverride(e.target.checked)}
+                        className="rounded border-amber-400 text-primary-600 focus:ring-primary-500 w-4 h-4 cursor-pointer"
+                      />
+                      <span>Saya yakin ingin mengubah status kehadiran siswa ini menjadi {status} (misal: sakit saat jam pelajaran).</span>
+                    </label>
+                  )}
+                </div>
+              )}
             </div>
           ) : (
             // Kolom Input Pencarian Siswa
@@ -175,7 +272,6 @@ export const ManualExcuseModal: React.FC<ManualExcuseModalProps> = ({
                   placeholder="Ketik Nama atau ID siswa (contoh: Nurul / M1B-26)..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  autoFocus
                   className="w-full bg-surface text-content-primary text-xs rounded-button border border-border pl-9 pr-3.5 py-2.5 focus:outline-none focus:border-primary-600 focus:ring-1 focus:ring-primary-600 shadow-xs"
                 />
               </div>

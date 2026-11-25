@@ -2,27 +2,127 @@
 @tailwind components;
 @tailwind utilities;
 
-@layer base {
-  body {
-    @apply bg-canvas text-content-primary antialiased;
-    font-feature-settings: "cv02", "cv03", "cv04", "cv11";
-  }
+body {
+  background-color: #f4faf5;
+  color: #112918;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+}
 
-  /* Custom scrollbar untuk tabel & daftar panjang */
-  ::-webkit-scrollbar {
-    width: 6px;
-    height: 6px;
-  }
-  ::-webkit-scrollbar-track {
-    background: #f1f1f1;
-  }
-  ::-webkit-scrollbar-thumb {
-    background: #c7cbd1;
-    border-radius: 999px;
-  }
-  ::-webkit-scrollbar-thumb:hover {
-    background: #9aa1a9;
-  }
+/* Custom scrollbar untuk tabel & daftar panjang */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: #f1f1f1;
+}
+::-webkit-scrollbar-thumb {
+  background: #c7cbd1;
+  border-radius: 999px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #9aa1a9;
+}
+
+/* ==========================================================================
+   ========================================================================== */
+:root {
+  --color-primary-50: #f0fdf2;
+  --color-primary-100: #dcfce4;
+  --color-primary-200: #bbf7cb;
+  --color-primary-300: #86ef9f;
+  --color-primary-400: #4ade6b;
+  --color-primary-500: #34c759;
+  --color-primary-600: #2e8b38;
+  --color-primary-700: #23732d;
+  --color-primary-800: #1e5c26;
+  --color-primary-900: #184b20;
+
+  --color-sidebar: #1c5e2d;
+  --color-sidebar-muted: #247539;
+  --color-sidebar-border: #267b3c;
+  --color-canvas: #f4faf5;
+  --color-surface: #ffffff;
+}
+
+/* Background Hijau Edlink */
+.bg-primary-50  { background-color: #f0fdf2 !important; }
+.bg-primary-100 { background-color: #dcfce4 !important; }
+.bg-primary-200 { background-color: #bbf7cb !important; }
+.bg-primary-400 { background-color: #4ade6b !important; }
+.bg-primary-500 { background-color: #34c759 !important; }
+.bg-primary-600 { background-color: #2e8b38 !important; }
+.bg-primary-700 { background-color: #23732d !important; }
+.bg-primary-800 { background-color: #1e5c26 !important; }
+
+.hover\:bg-primary-50:hover  { background-color: #f0fdf2 !important; }
+.hover\:bg-primary-100:hover { background-color: #dcfce4 !important; }
+.hover\:bg-primary-700:hover { background-color: #23732d !important; }
+.hover\:bg-primary-800:hover { background-color: #1e5c26 !important; }
+
+/* Teks Hijau Edlink */
+.text-primary-400 { color: #4ade6b !important; }
+.text-primary-500 { color: #34c759 !important; }
+.text-primary-600 { color: #2e8b38 !important; }
+.text-primary-700 { color: #23732d !important; }
+.text-primary-800 { color: #1e5c26 !important; }
+.text-primary-900 { color: #184b20 !important; }
+
+.hover\:text-primary-700:hover { color: #23732d !important; }
+.hover\:text-primary-800:hover { color: #1e5c26 !important; }
+
+/* Border Hijau Edlink */
+.border-primary-100 { border-color: #dcfce4 !important; }
+.border-primary-200 { border-color: #bbf7cb !important; }
+.border-primary-300 { border-color: #86ef9f !important; }
+.border-primary-400 { border-color: #4ade6b !important; }
+.border-primary-500 { border-color: #34c759 !important; }
+.border-primary-600 { border-color: #2e8b38 !important; }
+.focus\:border-primary-600:focus { border-color: #2e8b38 !important; }
+.focus\:ring-primary-600:focus   { --tw-ring-color: #2e8b38 !important; }
+.focus\:ring-primary-500:focus   { --tw-ring-color: #34c759 !important; }
+.focus\:ring-primary-100:focus   { --tw-ring-color: #dcfce4 !important; }
+
+/* Sidebar Fresh Edlink Green */
+.bg-sidebar { background-color: #1c5e2d !important; }
+.bg-sidebar-muted { background-color: #247539 !important; }
+.border-sidebar-border { border-color: #267b3c !important; }
+.hover\:bg-sidebar-muted:hover { background-color: #247539 !important; }
+
+/* Background Canvas Bersih Bernuansa Mint Lembut */
+.bg-canvas { background-color: #f4faf5 !important; }
+
+/* ==========================================================================
+   APPLE-STYLE TRANSLUCENT FROSTED GLASS (Backdrop Blur Effect)
+   ========================================================================== */
+.apple-glass-nav {
+  background-color: rgba(255, 255, 255, 0.82) !important;
+  -webkit-backdrop-filter: blur(20px) saturate(180%) !important;
+  backdrop-filter: blur(20px) saturate(180%) !important;
+}
+
+/* Varian khusus untuk background gelap/hijau (halaman login, header di atas gradien hijau) */
+.apple-glass-nav-dark {
+  background-color: rgba(22, 78, 37, 0.65) !important;
+  -webkit-backdrop-filter: blur(20px) saturate(180%) !important;
+  backdrop-filter: blur(20px) saturate(180%) !important;
+}
+
+.apple-glass-dock {
+  background-color: rgba(255, 255, 255, 0.88) !important;
+  -webkit-backdrop-filter: blur(24px) saturate(190%) !important;
+  backdrop-filter: blur(24px) saturate(190%) !important;
+}
+
+/* Tombol Aksen Oranye Edlink (seperti tombol Masuk & Mulai Sekarang) */
+.btn-edlink-accent {
+  background-color: #f59e0b !important;
+  color: #ffffff !important;
+}
+.btn-edlink-accent:hover {
+  background-color: #d97706 !important;
 }
 
 /* Animasi pulse lembut untuk scan sukses/gagal */
@@ -45,4 +145,185 @@
 .flash-danger {
   animation: scan-flash-danger 0.6s ease-out;
 }
+
+/* ==========================================================================
+   ULTRA-MODERN SWEETALERT2 STYLING (Apple & Linear Design System)
+   ========================================================================== */
+.swal2-container {
+  z-index: 99999 !important;
+  backdrop-filter: blur(8px) !important;
+  -webkit-backdrop-filter: blur(8px) !important;
+}
+
+.swal2-popup.swal2-modern-card {
+  border-radius: 28px !important;
+  padding: 1.75rem 1.5rem 1.5rem !important;
+  max-width: 400px !important;
+  width: 90% !important;
+  background: #ffffff !important;
+  box-shadow: 0 25px 60px -15px rgba(0, 0, 0, 0.2), 0 0 0 1px rgba(0, 0, 0, 0.04) !important;
+  border: 1px solid rgba(226, 232, 240, 0.8) !important;
+  font-family: 'Inter', system-ui, -apple-system, sans-serif !important;
+}
+
+.swal2-modern-title {
+  font-size: 1.25rem !important;
+  font-weight: 800 !important;
+  color: #0f172a !important;
+  letter-spacing: -0.025em !important;
+  margin-top: 0.5rem !important;
+  margin-bottom: 0.35rem !important;
+  padding: 0 !important;
+}
+
+.swal2-modern-body {
+  font-size: 0.875rem !important;
+  line-height: 1.55 !important;
+  color: #64748b !important;
+  margin: 0 auto 1.25rem !important;
+  padding: 0 0.5rem !important;
+}
+
+.swal2-modern-actions {
+  display: flex !important;
+  gap: 0.75rem !important;
+  width: 100% !important;
+  margin: 0 !important;
+  padding-top: 0.5rem !important;
+}
+
+.swal2-modern-confirm-btn {
+  flex: 1 !important;
+  padding: 0.75rem 1.25rem !important;
+  border-radius: 14px !important;
+  font-size: 0.8125rem !important;
+  font-weight: 700 !important;
+  color: #ffffff !important;
+  background: linear-gradient(135deg, #16a34a, #059669) !important;
+  border: none !important;
+  box-shadow: 0 4px 14px 0 rgba(22, 163, 74, 0.35) !important;
+  cursor: pointer !important;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1) !important;
+}
+.swal2-modern-confirm-btn:hover {
+  transform: translateY(-1px) !important;
+  box-shadow: 0 6px 20px 0 rgba(22, 163, 74, 0.45) !important;
+  background: linear-gradient(135deg, #15803d, #047857) !important;
+}
+.swal2-modern-confirm-btn:active {
+  transform: scale(0.97) !important;
+}
+
+.swal2-modern-confirm-btn.btn-danger {
+  background: linear-gradient(135deg, #dc2626, #b91c1c) !important;
+  box-shadow: 0 4px 14px 0 rgba(220, 38, 38, 0.35) !important;
+}
+.swal2-modern-confirm-btn.btn-danger:hover {
+  background: linear-gradient(135deg, #b91c1c, #991b1b) !important;
+  box-shadow: 0 6px 20px 0 rgba(220, 38, 38, 0.45) !important;
+}
+
+.swal2-modern-confirm-btn.btn-warning {
+  background: linear-gradient(135deg, #d97706, #b45309) !important;
+  box-shadow: 0 4px 14px 0 rgba(217, 119, 6, 0.35) !important;
+}
+.swal2-modern-confirm-btn.btn-warning:hover {
+  background: linear-gradient(135deg, #b45309, #92400e) !important;
+  box-shadow: 0 6px 20px 0 rgba(217, 119, 6, 0.45) !important;
+}
+
+.swal2-modern-cancel-btn {
+  flex: 1 !important;
+  padding: 0.75rem 1.25rem !important;
+  border-radius: 14px !important;
+  font-size: 0.8125rem !important;
+  font-weight: 700 !important;
+  color: #475569 !important;
+  background: #f1f5f9 !important;
+  border: 1px solid #e2e8f0 !important;
+  cursor: pointer !important;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1) !important;
+}
+.swal2-modern-cancel-btn:hover {
+  background: #e2e8f0 !important;
+  color: #1e293b !important;
+}
+.swal2-modern-cancel-btn:active {
+  transform: scale(0.97) !important;
+}
+
+/* Modern Icons in SweetAlert2 */
+.swal2-icon.swal2-modern-icon {
+  border: none !important;
+  width: 4.5rem !important;
+  height: 4.5rem !important;
+  margin: 0.5rem auto 0.75rem !important;
+}
+.swal2-icon.swal2-success {
+  border: 3px solid #16a34a !important;
+  color: #16a34a !important;
+}
+.swal2-icon.swal2-error {
+  border: 3px solid #dc2626 !important;
+  color: #dc2626 !important;
+}
+.swal2-icon.swal2-warning {
+  border: 3px solid #d97706 !important;
+  color: #d97706 !important;
+}
+
+/* Modern Toast */
+.swal2-popup.swal2-toast {
+  border-radius: 18px !important;
+  background: rgba(15, 23, 42, 0.92) !important;
+  backdrop-filter: blur(12px) !important;
+  -webkit-backdrop-filter: blur(12px) !important;
+  color: #ffffff !important;
+  box-shadow: 0 20px 35px -10px rgba(0, 0, 0, 0.35) !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  padding: 0.75rem 1.25rem !important;
+}
+.swal2-toast .swal2-title {
+  color: #ffffff !important;
+  font-size: 0.8125rem !important;
+  font-weight: 600 !important;
+}
+
+/* ==========================================================================
+   ANIMATIONS & TRANSITIONS
+   ========================================================================== */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes bounceIn {
+  0% {
+    transform: scale(0.92);
+    opacity: 0;
+  }
+  60% {
+    transform: scale(1.02);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.22s ease-out forwards;
+}
+
+.animate-bounce-in {
+  animation: bounceIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+}
+
 

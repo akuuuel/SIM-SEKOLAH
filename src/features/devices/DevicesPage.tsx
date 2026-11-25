@@ -2,22 +2,26 @@ import React, { useState } from 'react';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { db } from '../../db/attendanceDb';
 import { syncPendingTransactions, fetchMasterStudentsFromSheets, getAppsScriptUrl } from '../../services/syncService';
-import type { DeviceId } from '../../types';
+import type { DeviceId, UserAccount } from '../../types';
 import { Button } from '../../components/ui/Button';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '../../components/ui/Card';
 import { Badge } from '../../components/ui/Badge';
-import { Monitor, RefreshCw, Download, CheckCircle2, Laptop, AlertCircle, CloudDownload } from 'lucide-react';
+import { Monitor, RefreshCw, Download, CheckCircle2, Laptop, AlertCircle, CloudDownload, Lock } from 'lucide-react';
 import { formatTime } from '../../lib/utils';
+import { Swal } from '../../lib/swal';
 
 export interface DevicesPageProps {
   currentDeviceId: DeviceId;
   onSetCurrentDevice: (id: DeviceId) => void;
+  currentUser?: UserAccount | null;
 }
 
 export const DevicesPage: React.FC<DevicesPageProps> = ({
   currentDeviceId,
   onSetCurrentDevice,
+  currentUser,
 }) => {
+  const isSuperAdmin = currentUser?.role === 'SUPER_ADMIN';
   const [isSyncing, setIsSyncing] = useState(false);
   const [isFetchingStudents, setIsFetchingStudents] = useState(false);
   const [syncResult, setSyncResult] = useState<{ success: boolean; message: string } | null>(null);
@@ -109,9 +113,6 @@ export const DevicesPage: React.FC<DevicesPageProps> = ({
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h2 className="text-xl font-bold text-content-primary">Perangkat & Sinkronisasi 3 PC</h2>
-          <p className="text-xs text-content-secondary mt-1">
-            Manajemen identitas komputer absensi dan status antrean sinkronisasi IndexedDB ke database pusat.
-          </p>
         </div>
         <div className="flex flex-wrap items-center gap-2">
           <Button
@@ -159,6 +160,16 @@ export const DevicesPage: React.FC<DevicesPageProps> = ({
         </div>
       )}
 
+      {/* Peringatan jika bukan Super Admin */}
+      {!isSuperAdmin && (
+        <div className="p-3 bg-amber-50 border border-amber-200 rounded-xl text-xs font-semibold text-amber-900 flex items-center gap-2 shadow-xs">
+          <Lock className="w-4 h-4 text-amber-600 shrink-0" />
+          <span>
+            <b>Identitas Workstation Terkunci:</b> Hanya akun <b>Super Admin</b> yang berhak mengganti identitas komputer PC ini. Operator hanya diizinkan bekerja pada workstation yang telah ditugaskan.
+          </span>
+        </div>
+      )}
+
       {/* Kartu Pemilihan Perangkat Komputer */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         {devices.map((device) => {
@@ -168,16 +179,32 @@ export const DevicesPage: React.FC<DevicesPageProps> = ({
           return (
             <Card
               key={device.id}
-              className={`p-5 transition-all cursor-pointer ${
+              className={`p-5 transition-all ${
                 isSelected
-                  ? 'border-2 border-primary-600 bg-primary-50/20 shadow-md'
-                  : 'hover:border-gray-300'
+                  ? 'border-2 border-[#2e8b38] bg-emerald-50/20 shadow-md'
+                  : isSuperAdmin
+                  ? 'hover:border-gray-300 cursor-pointer'
+                  : 'opacity-70 cursor-not-allowed bg-gray-50/50'
               }`}
-              onClick={() => onSetCurrentDevice(device.id)}
+              onClick={async () => {
+                if (isSuperAdmin) {
+                  if (device.id === currentDeviceId) return;
+                  const confirmed = await Swal.confirm(
+                    `Ganti ke ${device.id}?`,
+                    `Apakah Anda yakin ingin mengganti identitas workstation aktif komputer ini ke <b>${device.id}</b> (${device.name})?`,
+                    'Ya, Ganti Workstation',
+                    'Batal'
+                  );
+                  if (confirmed) {
+                    onSetCurrentDevice(device.id);
+                    Swal.toast(`Workstation diganti ke ${device.id}`, 'success');
+                  }
+                }
+              }}
             >
               <div className="flex items-start justify-between">
                 <div className="flex items-center gap-3">
-                  <div className={`p-2.5 rounded-xl ${isSelected ? 'bg-primary-600 text-white' : 'bg-gray-100 text-gray-700'}`}>
+                  <div className={`p-2.5 rounded-xl ${isSelected ? 'bg-[#2e8b38] text-white' : 'bg-gray-100 text-gray-700'}`}>
                     <Laptop className="w-5 h-5" />
                   </div>
                   <div>
@@ -186,13 +213,17 @@ export const DevicesPage: React.FC<DevicesPageProps> = ({
                   </div>
                 </div>
                 {isSelected ? (
-                  <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-primary-600 text-white">
+                  <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-[#2e8b38] text-white">
                     Perangkat Ini
                   </span>
-                ) : (
-                  <button className="text-[11px] text-primary-600 font-semibold hover:underline">
+                ) : isSuperAdmin ? (
+                  <button className="text-[11px] text-[#2e8b38] font-semibold hover:underline">
                     Pilih PC Ini
                   </button>
+                ) : (
+                  <span className="text-[10px] font-semibold text-gray-400 flex items-center gap-1">
+                    <Lock className="w-3 h-3" /> Terkunci
+                  </span>
                 )}
               </div>
 
@@ -203,7 +234,7 @@ export const DevicesPage: React.FC<DevicesPageProps> = ({
                 </div>
                 <div className="flex justify-between">
                   <span className="text-content-secondary">Akun Ditugaskan:</span>
-                  <span className="font-semibold text-primary-700">@{device.operator}</span>
+                  <span className="font-semibold text-[#2e8b38]">@{device.operator}</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-content-secondary">Total Tercatat:</span>

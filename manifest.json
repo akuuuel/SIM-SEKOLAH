@@ -1,0 +1,35 @@
+{
+  "id": "/",
+  "name": "Sistem Absensi MAN 1 BULUKUMBA",
+  "short_name": "Absensi M1B",
+  "description": "Aplikasi Presensi Siswa dan Portal Pemantauan Orang Tua MAN 1 BULUKUMBA Berbasis Web PWA Offline-First",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "display_override": ["standalone", "fullscreen"],
+  "background_color": "#FAFBF9",
+  "theme_color": "#16A34A",
+  "orientation": "portrait",
+  "categories": ["education", "productivity"],
+  "prefer_related_applications": false,
+  "icons": [
+    {
+      "src": "/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/maskable-icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ]
+}

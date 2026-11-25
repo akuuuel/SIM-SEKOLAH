@@ -41,8 +41,8 @@ export const Badge: React.FC<BadgeProps> = ({
         text = text || 'Izin';
         break;
       case 'SAKIT':
-        badgeStyles = 'bg-purple-100 text-purple-700 font-semibold';
-        dotStyles = 'bg-purple-600';
+        badgeStyles = 'bg-sky-100 text-sky-700 font-semibold';
+        dotStyles = 'bg-sky-500';
         text = text || 'Sakit';
         break;
       case 'ALFA':

@@ -1,0 +1,80 @@
+/* Fallback font stack saat offline (Inter tidak termuat dari Google Fonts) */
+      :root { font-family: Inter, ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; }
+
+      @keyframes spin { to { transform: rotate(360deg); } }
+
+      #html5qr-reader,
+      #html5qr-reader-fallback {
+        border: none !important;
+        width: 100% !important;
+        height: 100% !important;
+        overflow: hidden !important;
+        border-radius: 16px !important;
+      }
+      #html5qr-reader video,
+      #html5qr-reader-fallback video,
+      .scanner-video-preview {
+        width: 100% !important;
+        height: 100% !important;
+        max-height: 100% !important;
+        border-radius: 16px !important;
+        object-fit: cover !important;
+        object-position: center !important;
+        background: #000000 !important;
+        display: block !important;
+      }
+      #html5qr-reader__scan_region,
+      #html5qr-reader-fallback__scan_region {
+        display: flex !important;
+        justify-content: center !important;
+        align-items: center !important;
+        border: none !important;
+        width: 100% !important;
+        height: 100% !important;
+      }
+      #html5qr-reader__scan_region img,
+      #html5qr-reader-fallback__scan_region img {
+        display: none !important;
+      }
+      #html5qr-reader__header_message,
+      #html5qr-reader-fallback__header_message {
+        display: none !important;
+      }
+      /* =========================================================
+         Print CSS — cetak kartu barcode dengan jelas & tajam
+         ========================================================= */
+      @media print {
+        /* Sembunyikan seluruh UI web (sidebar, topbar, modal backdrop, tombol) */
+        body * {
+          visibility: hidden !important;
+        }
+
+        /* Tampilkan HANYA kartu barcode beserta seluruh elemen di dalamnya */
+        #print-barcode-card,
+        #print-barcode-card * {
+          visibility: visible !important;
+        }
+
+        /* Posisikan kartu di tengah halaman cetak */
+        #print-barcode-card {
+          position: fixed !important;
+          left: 50% !important;
+          top: 30px !important;
+          transform: translateX(-50%) !important;
+          margin: 0 !important;
+          box-shadow: none !important;
+          border: 2px solid #000000 !important;
+          background: #ffffff !important;
+          width: 320px !important;
+          max-width: 90% !important;
+          page-break-inside: avoid !important;
+        }
+
+        /* Pastikan canvas barcode tercetak dengan warna asli (tidak pudar) */
+        #print-barcode-card canvas {
+          display: block !important;
+          margin: 0 auto !important;
+          -webkit-print-color-adjust: exact !important;
+          print-color-adjust: exact !important;
+        }
+      }

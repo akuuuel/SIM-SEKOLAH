@@ -895,7 +895,7 @@ Desain dianggap siap diimplementasikan jika kriteria berikut terpenuhi:
 
 ### Visual
 
-- [ ] Sidebar gelap dan aksen biru sesuai referensi.
+- [ ] Sidebar gelap dan aksen Hijau Putih sesuai referensi.
 - [ ] Area konten terang dan memiliki hierarki yang jelas.
 - [ ] Kartu, tabel, badge, dan tombol konsisten.
 - [ ] Tidak ada konten dashboard penjualan yang tersisa.

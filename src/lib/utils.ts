@@ -142,6 +142,29 @@ export async function hashPassword(password: string): Promise<string> {
 }
 
 /**
+ * Verifikasi password dengan dukungan fleksibel:
+ * 1. Salted SHA-256 (format enkripsi default aplikasi)
+ * 2. Plaintext (jika admin input langsung kata sandi di phpMyAdmin / MySQL)
+ * 3. Pure SHA-256 tanpa salt (jika di-hash fungsi SHA2 bawaan SQL)
+ */
+export async function verifyPassword(plainInput: string, storedHash: string): Promise<boolean> {
+  if (!storedHash) return false;
+
+  // 1. Salted hash bawaan aplikasi
+  const saltedHash = await hashPassword(plainInput);
+  if (storedHash === saltedHash) return true;
+
+  // 2. Plaintext (jika di database disimpan teks biasa tanpa hash)
+  if (storedHash === plainInput) return true;
+
+  // 3. Pure SHA-256 tanpa salt
+  const pureSha = sha256Fallback(plainInput);
+  if (storedHash.toLowerCase() === pureSha.toLowerCase()) return true;
+
+  return false;
+}
+
+/**
  * Sanitasi input string — hapus karakter berbahaya, trim, batas panjang
  */
 export function sanitizeInput(input: string, maxLength = 100): string {
@@ -220,10 +243,43 @@ export function resetLoginAttempts(): void {
   localStorage.removeItem(RATE_LIMIT_KEY);
 }
 
+/**
+ * Ambil tanggal lokal perangkat dalam format YYYY-MM-DD
+ * Mencegah bug toISOString() yang menghasilkan tanggal kemarin saat pagi hari (sebelum jam 08:00 WITA)
+ */
+export function getLocalDateString(dateInput: Date | string = new Date()): string {
+  const d = typeof dateInput === 'string' ? new Date(dateInput) : dateInput;
+  if (isNaN(d.getTime())) {
+    const fallback = new Date();
+    const y = fallback.getFullYear();
+    const m = String(fallback.getMonth() + 1).padStart(2, '0');
+    const day = String(fallback.getDate()).padStart(2, '0');
+    return `${y}-${m}-${day}`;
+  }
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
+  return `${y}-${m}-${day}`;
+}
+
 export function formatTime(isoString: string): string {
   try {
+    if (!isoString) return '--:--';
+    // Jika sudah berupa format jam 'HH:mm' atau 'HH:mm:ss'
+    if (/^\d{2}:\d{2}(:\d{2})?$/.test(isoString)) {
+      return isoString.substring(0, 5);
+    }
     const d = new Date(isoString);
-    return d.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+    if (isNaN(d.getTime())) return isoString;
+    return d
+      .toLocaleTimeString('id-ID', {
+        timeZone: 'Asia/Makassar',
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit',
+        hour12: false,
+      })
+      .replace(/\./g, ':');
   } catch {
     return isoString;
   }
@@ -232,7 +288,14 @@ export function formatTime(isoString: string): string {
 export function formatDate(isoString: string): string {
   try {
     const d = new Date(isoString);
-    return d.toLocaleDateString('id-ID', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+    if (isNaN(d.getTime())) return isoString;
+    return d.toLocaleDateString('id-ID', {
+      timeZone: 'Asia/Makassar',
+      weekday: 'long',
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+    });
   } catch {
     return isoString;
   }
@@ -247,5 +310,27 @@ export function generateUUID(): string {
     const v = c === 'x' ? r : (r & 0x3) | 0x8;
     return v.toString(16);
   });
+}
+
+/**
+ * Normalisasi nomor WhatsApp Indonesia (contoh: '+62 812-3456-7890' -> '081234567890')
+ */
+export function normalizePhoneNumber(phone: string): string {
+  if (!phone) return '';
+  let cleaned = phone.replace(/[^0-9+]/g, '');
+  if (cleaned.startsWith('+62')) {
+    cleaned = '0' + cleaned.substring(3);
+  } else if (cleaned.startsWith('62')) {
+    cleaned = '0' + cleaned.substring(2);
+  }
+  return cleaned;
+}
+
+/**
+ * Validasi apakah nomor HP Indonesia valid (diawali 08, panjang 10-14 digit)
+ */
+export function isValidIndonesianPhone(phone: string): boolean {
+  const norm = normalizePhoneNumber(phone);
+  return /^08[1-9][0-9]{7,11}$/.test(norm);
 }
 

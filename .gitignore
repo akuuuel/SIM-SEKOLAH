@@ -32,3 +32,21 @@ pnpm-debug.log*
 .DS_Store
 Thumbs.db
 
+# Keamanan, Kunci Rahasia, & Sertifikat SSL
+ssl/
+api/vapid.json
+*.key
+*.crt
+*.pem
+
+# Berkas Arsip & Backup Besar
+*.zip
+*.tar.gz
+*.rar
+siap_hosting.zip
+
+# Script & Cache Lokal Sementara
+start_tunnel.bat
+api/.badge_v2_done
+
+

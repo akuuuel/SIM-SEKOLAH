@@ -1,0 +1,6 @@
+{
+    "publicKey": "MASUKKAN_VAPID_PUBLIC_KEY_ANDA",
+    "privateKey": "MASUKKAN_VAPID_PRIVATE_KEY_ANDA",
+    "privatePem": "-----BEGIN EC PRIVATE KEY-----\n...\n-----END EC PRIVATE KEY-----\n",
+    "subject": "mailto:admin@madrasah.sch.id"
+}

@@ -7,40 +7,54 @@ export default {
   theme: {
     extend: {
       colors: {
+        // Tema Warna Resmi (Sesuai Referensi Gambar Pengguna)
+        // Hijau segar & hangat (#38a638 / #2e8b2e) dengan aksen oranye CTA (#f59e0b)
         primary: {
-          50: '#F0F2FF',
-          100: '#E8EBFF',
-          500: '#2A3DFF',
-          600: '#172BFF', // Electric blue accent
-          700: '#1022D8',
-          800: '#0B189E',
+          50: '#f0fdf2',
+          100: '#dcfce4',
+          200: '#bbf7cb',
+          300: '#86ef9f',
+          400: '#4ade6b',
+          500: '#34c759',
+          600: '#2e8b38', // Hijau Khas  (Vibrant, Fresh Education)
+          700: '#23732d', // Hover state
+          800: '#1e5c26',
+          900: '#184b20',
+          950: '#092910',
+        },
+        // Aksen Kuning/Oranye Khas Tombol "Mulai Sekarang" & "Masuk" Edlink
+        accent: {
+          DEFAULT: '#f59e0b',
+          hover: '#d97706',
+          light: '#fef3c7',
+          dark: '#b45309',
         },
         sidebar: {
-          DEFAULT: '#090A0F', // Dark sidebar background
-          muted: '#171923',   // Hover item background
-          border: '#202330',
+          DEFAULT: '#144622', // Deep Forest Edlink Green
+          muted: '#1b5a2c',   // Hover item background
+          border: '#246b36',
         },
-        canvas: '#F3F4F6',    // Main light canvas background
-        surface: '#FFFFFF',   // Cards, panels, modals
+        canvas: '#f4faf5',    // Latar belakang lembut dengan sentuhan mint segar Edlink
+        surface: '#ffffff',   // Cards, panels, modals
         content: {
-          primary: '#171923',
-          secondary: '#6B7280',
-          muted: '#9CA3AF',
+          primary: '#112918', // Dark forest slate untuk teks utama yang sangat terbaca
+          secondary: '#4d6954',
+          muted: '#7a9681',
         },
         border: {
-          DEFAULT: '#E5E7EB',
-          subtle: '#F0F1F3',
-          strong: '#D1D5DB',
+          DEFAULT: '#e1ede4',
+          subtle: '#ebf4ed',
+          strong: '#c4ddcb',
         },
         status: {
-          success: '#16A34A',
-          'success-bg': '#DCFCE7',
-          warning: '#D97706',
-          'warning-bg': '#FEF3C7',
-          danger: '#DC2626',
-          'danger-bg': '#FEE2E2',
-          info: '#2563EB',
-          'info-bg': '#DBEAFE',
+          success: '#2e8b38',
+          'success-bg': '#dcfce4',
+          warning: '#d97706',
+          'warning-bg': '#fef3c7',
+          danger: '#dc2626',
+          'danger-bg': '#fee2e2',
+          info: '#0284c7',
+          'info-bg': '#e0f2fe',
         },
       },
       fontFamily: {
@@ -59,4 +73,3 @@ export default {
   },
   plugins: [],
 };
-
